@@ -1,18 +1,9 @@
-const products = [
-  { id: 'oak-island', name: 'The Sunday Island', category: 'Storage', type: 'Kitchen island', price: 1280, badge: 'Made to order', badgeTone: 'sage', color: 'Natural oak', image: 'photo-1663337048816-2cac387bee81', description: 'A generous kitchen island made for slow breakfasts, floury afternoons and the people who always gather in the kitchen. Crafted from solid European oak with softly rounded edges.' },
-  { id: 'harvest-stool', name: 'Harvest Counter Stool', category: 'Seating', type: 'Solid oak · Set of 2', price: 420, badge: 'Bestseller', badgeTone: 'terracotta', color: 'Natural oak', image: 'photo-1666003449012-61951d621555', description: 'A sturdy, easy-to-love stool with a curved seat that makes an extra cup of coffee feel like a good idea. Finished by hand in a hard-wearing natural oil.' },
-  { id: 'linen-pendant', name: 'The Gather Pendant', category: 'Lighting', type: 'Linen & brushed brass', price: 365, badge: 'Almost gone', badgeTone: 'warm', color: 'Ivory', image: 'photo-1609280069678-ab9ef26a0b05', description: 'Soft, diffused light in a pleated linen shade. The warm glow that takes dinner from Tuesday night to just one more glass.' },
-  { id: 'pantry-cabinet', name: 'Sunday Pantry Cabinet', category: 'Storage', type: 'Oak · 2-door', price: 1640, badge: '', badgeTone: '', color: 'Smoked oak', image: 'photo-1655043126266-20372f823c6a', description: 'A calm place for plates, tea towels and all the other things a kitchen quietly collects. Solid oak doors, adjustable shelves and a little breathing room.' },
-  { id: 'market-board', name: 'Market Chopping Board', category: 'Accessories', type: 'Hand-finished walnut', price: 95, badge: 'Small batch', badgeTone: 'sage', color: 'Walnut', image: 'photo-1705103926135-cb4e2be73bb2', description: 'A substantial walnut board with a deep juice groove and a comfortable handhold. Equally happy chopping herbs or holding a hunk of bread.' },
-  { id: 'everyday-chair', name: 'Everyday Dining Chair', category: 'Seating', type: 'Ash & rush seat', price: 540, badge: '', badgeTone: '', color: 'Natural ash', image: 'photo-1503602642458-232111445657', description: 'A familiar shape with just enough softness. The woven seat gives a little, the solid ash frame stands firm, and it looks right at every kind of table.' },
-  { id: 'ceramic-set', name: 'Morning Ceramic Set', category: 'Accessories', type: 'Hand-thrown · Set of 4', price: 128, badge: 'Small batch', badgeTone: 'sage', color: 'Oat glaze', image: 'photo-1556205801-a0bf81cdc90d', description: 'Four quietly beautiful bowls, each thrown by hand and finished in a soft oat glaze. Just enough variation to remind you they were made by a person.' },
-  { id: 'open-shelf', name: 'Little Things Shelf', category: 'Storage', type: 'Solid oak · Wall mounted', price: 285, badge: '', badgeTone: '', color: 'Natural oak', image: 'photo-1726503453413-5bfb0e1d931d', description: 'A useful little perch for the cookbook you use every week, a favourite mug or that tiny pot of thyme you keep rescuing. Solid oak, quietly doing its job.' },
-];
+import { products, imageUrl, money } from './products.js';
 
-const imageUrl = (id, width = 900) => `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${width}&q=82`;
-const money = amount => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(amount);
 const grid = document.querySelector('#product-grid');
-const cart = new Map();
+const cartStorageKey = 'atelier-maison-cart';
+const storedCart = JSON.parse(localStorage.getItem(cartStorageKey) || '[]');
+const cart = new Map(storedCart.map(({ id, quantity }) => [id, { product: products.find(item => item.id === id), quantity }]).filter(([, entry]) => entry.product));
 const favorites = new Set();
 let activeCategory = 'All pieces';
 let searchTerm = '';
@@ -70,6 +61,7 @@ function addToCart(id, amount = 1) {
 }
 
 function updateCart() {
+  localStorage.setItem(cartStorageKey, JSON.stringify([...cart.values()].map(({ product, quantity }) => ({ id: product.id, quantity }))));
   const count = [...cart.values()].reduce((sum, item) => sum + item.quantity, 0);
   const subtotal = [...cart.values()].reduce((sum, item) => sum + item.product.price * item.quantity, 0);
   document.querySelector('#cart-count').textContent = count;
@@ -108,12 +100,7 @@ function closePanels() {
 }
 
 function openProduct(id) {
-  const product = products.find(item => item.id === id);
-  document.querySelector('#modal-content').innerHTML = `<div class="modal-image"><img src="${imageUrl(product.image, 1100)}" alt="${product.name}"></div><div class="modal-details"><p class="eyebrow">${product.type}</p><h2>${product.name}</h2><p class="modal-price">${money(product.price)}</p><p class="modal-description">${product.description}</p><p class="modal-color">Colour · <strong>${product.color}</strong></p><button class="button modal-add" data-add="${product.id}">Add to bag <span>↗</span></button><p class="modal-delivery">✳ Complimentary delivery over $150</p><div class="modal-details-list"><span>Thoughtfully made</span><span>Easy returns within 30 days</span></div></div>`;
-  document.querySelector('#overlay').classList.add('visible');
-  document.querySelector('#product-modal').classList.add('open');
-  document.querySelector('#product-modal').setAttribute('aria-hidden', 'false');
-  document.body.classList.add('locked');
+  window.location.href = `/product.html?id=${encodeURIComponent(id)}`;
 }
 
 grid.addEventListener('click', event => {
@@ -175,7 +162,7 @@ document.querySelector('#cart-items').addEventListener('click', event => {
   }
   if (remove) { cart.delete(remove.dataset.remove); updateCart(); }
 });
-document.querySelector('#checkout-button').addEventListener('click', () => showToast('Checkout is ready to connect to your store platform.'));
+document.querySelector('#checkout-button').addEventListener('click', () => { window.location.href = '/checkout.html'; });
 document.querySelector('#account-button').addEventListener('click', () => showToast('Your account area is ready to connect.'));
 document.querySelector('#menu-toggle').addEventListener('click', () => document.querySelector('#main-nav').classList.toggle('mobile-open'));
 document.querySelector('#main-nav').addEventListener('click', event => { if (event.target.closest('a')) document.querySelector('#main-nav').classList.remove('mobile-open'); });

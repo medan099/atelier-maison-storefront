@@ -18,9 +18,10 @@ npm run preview
 
 ## Storefront features
 
+- Separate home, shop, product, about, bag, checkout, and order confirmation pages
 - Product collection with category filters, search, and sorting
 - Product quick views and wishlist toggles
 - Shopping bag drawer with quantity controls, subtotal, and delivery threshold
-- Responsive navigation, newsletter interaction, and checkout placeholder
+- Responsive navigation, newsletter interaction, and a four-step demo checkout
 
-Product photography is loaded from Unsplash. Cart, wishlist, newsletter, account, and checkout interactions run in the browser and are demo-only until connected to a store backend.
+Product photography is loaded from Unsplash. The cart and wishlist are saved in this browser. Checkout collects no card information, charges no payment, and sends no real order; the confirmation is a local demo. Connect a store backend and payment provider before accepting real orders.
